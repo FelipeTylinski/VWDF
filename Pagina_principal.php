@@ -115,7 +115,7 @@ $tipo_usuario = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : '
 </head>
 <body>
 <header>
-    <h1>Bem-vindo à Página Principal</h1>  <!-- Cabeçalho da página -->
+    <h1> à Página Principal</h1>  <!-- Cabeçalho da página -->
 </header>
 <nav>
     <!-- Formulário para logout -->
