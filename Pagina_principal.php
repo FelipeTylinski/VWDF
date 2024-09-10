@@ -127,7 +127,7 @@ $tipo_usuario = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : '
     <a href="Consultar.php">Consultar</a>  <!-- Link para consultar -->
     
     <!-- Verifica se o usuário não é um aluno e exibe opções adicionais -->
-    <?php if ($tipo_usuario != 'aluno'): ?>
+    <?php if ($tipo_usuario = 'aluno'): ?>
         <a href="Cad_ensalamento.php">Novo Ensalamento</a>  <!-- Link para cadastro de ensalamento -->
         <a href="Cadastro.php">Cadastrar Usuário</a>  <!-- Link para cadastro de usuário -->
     <?php endif; ?>
@@ -143,3 +143,4 @@ $tipo_usuario = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : '
 </footer>
 </body>
 </html>
+        
