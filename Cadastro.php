@@ -18,7 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         if (!$empty_input) {
-            $query_usuario = "INSERT INTO cadastrar (nome, email, telefone, sexo, data_nasc, cidade, estado, endereco,senha, tipo_usuario) VALUES (:Nome, :Email, :Telefone, :Sexo, :Data_nasc, :Cidade, :Estado, :Endereco, :Senha, :Tipo_usuario)";
+            // Criptografar a senha antes de salvar no banco de dados
+            $hashed_password = password_hash($dados['senha'], PASSWORD_DEFAULT);
+
+            $query_usuario = "INSERT INTO cadastrar (nome, email, telefone, sexo, data_nasc, cidade, estado, endereco, senha, tipo_usuario) 
+                              VALUES (:Nome, :Email, :Telefone, :Sexo, :Data_nasc, :Cidade, :Estado, :Endereco, :Senha, :Tipo_usuario)";
             
             // Preparar e executar a query
             $cad_usuario = $conn->prepare($query_usuario);
@@ -30,17 +34,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $cad_usuario->bindParam(':Cidade', $dados['cidade'], PDO::PARAM_STR);
             $cad_usuario->bindParam(':Estado', $dados['estado'], PDO::PARAM_STR);
             $cad_usuario->bindParam(':Endereco', $dados['endereco'], PDO::PARAM_STR);
-            $cad_usuario->bindParam(':Senha', $dados['senha'], PDO::PARAM_STR);
+            $cad_usuario->bindParam(':Senha', $hashed_password, PDO::PARAM_STR); // Usar a senha criptografada
             $cad_usuario->bindParam(':Tipo_usuario', $dados['tipo_usuario'], PDO::PARAM_STR);
             $cad_usuario->execute();
-            
+
             if ($cad_usuario->rowCount()) {
                 echo "<p style='color: green;'>Usuário cadastrado com sucesso!</p>";
-                // Limpar os campos do formulário após o cadastro
-                unset($dados);
-                // Redirecionar para a página inicial
-                header("Location: pagina_Principal.php");
-                exit(); // Certifique-se de sair após o redirecionamento
+                unset($dados); // Limpar os campos do formulário após o cadastro
+                header("Location: pagina_Principal.php"); // Redirecionar para a página principal
+                exit();
             } else {
                 echo "<p style='color: red;'>Erro: usuário não cadastrado!</p>";
             }
@@ -127,36 +129,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         #submit:hover {
             background-image: linear-gradient(to right, rgb(0, 80, 172), rgb(80, 19, 195));
         }
-        .home-icon {
-            width: 20px;
-            height: 20px;
-            vertical-align: middle;
-        }
-        .home-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            margin: 10px;
-        }
     </style>
-    <script>
-        function goHome() {
-            window.location.href = 'Pagina_principal.php';
-        }
-    </script>
 </head>
 <body>
-<button class="home-button" onclick="goHome()">
-        <img src="home-icon.png" class="home-icon">
-    </button>
     <div class="box">
         <form method="post" action="">
             <fieldset>
                 <legend><b>Formulário de Cadastro</b></legend>
                 
-                <br>
                 <div class="inputBox">
                     <input type="text" name="nome" id="nome" class="inputUser" required>
                     <label for="nome" class="labelInput">Nome completo</label>
@@ -200,9 +180,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 <br>
                 <div class="inputBox">
-                    <input type="Password" name="senha" id="senha" class="inputUser" required>
-                    <label for="Password" class="labelInput">Senha</label>
+                    <input type="password" name="senha" id="senha" class="inputUser" required>
+                    <label for="senha" class="labelInput">Senha</label>
                 </div>
+                <br>
                 <p>Tipo de Usuário:</p>
                 <input type="radio" id="aluno" name="tipo_usuario" value="aluno" required>
                 <label for="aluno">Aluno</label>
