@@ -15,6 +15,7 @@ $tipo_usuario = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : '
 
     <!-- Estilos CSS internos para estilizar a página -->
     <style>
+        h1 foi
         body {
             font-family: 'Roboto', sans-serif;  /* Define a fonte da página */
             background-image: url('vwdf.jpg');  /* Adiciona uma imagem de fundo */
