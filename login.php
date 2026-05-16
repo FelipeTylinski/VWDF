@@ -58,20 +58,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         /* Fundo animado */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(120, 40, 200, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(0, 100, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 60% 80%, rgba(180, 0, 255, 0.1) 0%, transparent 50%);
-            z-index: 0;
-            animation: bgPulse 8s ease-in-out infinite alternate;
-            background-image: url('vwdf.jpg.png');
-        }
+     body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
 
+    width: 100%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            rgba(0,0,0,0.45),
+            rgba(0,0,0,0.45)
+        ),
+        url('NOVA.png');
+
+    background-position: center center;
+    background-repeat: no-repeat;
+
+    /* ocupa a tela toda */
+    background-size: cover;
+
+    z-index: 0;
+
+    animation: bgPulse 8s ease-in-out infinite alternate;
+}
         @keyframes bgPulse {
             0%   { opacity: 0.6; }
             100% { opacity: 1; }

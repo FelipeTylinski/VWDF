@@ -2,37 +2,56 @@
 include_once './Conexao.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
     $dados = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 
     if (!empty($dados["submit"])) {
+
         $empty_input = false;
 
-        // Validar se todos os campos foram preenchidos
-        $dados = array_map('trim', $dados);
-        if (in_array("", $dados)) {
-            $empty_input = true;
-            $mensagem = "<div class='mensagem-erro'>Erro: Necessário preencher todos os campos!</div>";
+        $dados = array_map('trim',$dados);
+
+        if(in_array("",$dados)){
+            $empty_input=true;
+
+            $mensagem="
+            <div class='mensagem-erro'>
+            Preencha todos os campos!
+            </div>";
         }
 
-        if (!$empty_input) {
-            $query_ensalamento = "INSERT INTO Ensalamento (curso, professor, data, hora, sala) VALUES (:curso, :professor, :data, :hora, :sala)";
+        if(!$empty_input){
 
-            // Preparar e executar a query
-            $cad_ensalamento = $conn->prepare($query_ensalamento);
-            $cad_ensalamento->bindParam(':curso', $dados['curso'], PDO::PARAM_STR);
-            $cad_ensalamento->bindParam(':professor', $dados['professor'], PDO::PARAM_STR);
-            $cad_ensalamento->bindParam(':data', $dados['data'], PDO::PARAM_STR);
-            $cad_ensalamento->bindParam(':hora', $dados['hora'], PDO::PARAM_STR);
-            $cad_ensalamento->bindParam(':sala', $dados['sala'], PDO::PARAM_STR);
-            $cad_ensalamento->execute();
+            $query="INSERT INTO Ensalamento
+            (curso, professor, data, hora, sala)
+            VALUES
+            (:curso,:professor,:data,:hora,:sala)";
 
-            if ($cad_ensalamento->rowCount()) {
-                $mensagem = "<div class='mensagem-sucesso'>Ensalamento cadastrado com sucesso!</div>";
-                // Limpar os campos do formulário após o cadastro
+            $cad=$conn->prepare($query);
+
+            $cad->bindParam(':curso',$dados['curso']);
+            $cad->bindParam(':professor',$dados['professor']);
+            $cad->bindParam(':data',$dados['data']);
+            $cad->bindParam(':hora',$dados['hora']);
+            $cad->bindParam(':sala',$dados['sala']);
+
+            $cad->execute();
+
+            if($cad->rowCount()){
+
+                $mensagem="
+                <div class='mensagem-sucesso'>
+                Ensalamento cadastrado com sucesso!
+                </div>";
+
                 unset($dados);
-                
-            } else {
-                $mensagem = "<div class='mensagem-erro'>Erro: Ensalamento não cadastrado!</div>";
+
+            }else{
+
+                $mensagem="
+                <div class='mensagem-erro'>
+                Erro ao cadastrar!
+                </div>";
             }
         }
     }
@@ -41,173 +60,564 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulário</title>
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-image: linear-gradient(to right, gray, black);
-        }
-        .box {
-            color: white;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.4);
-            padding: 15px;
-            border-radius: 15px;
-            width: 20%;
-            box-sizing: border-box;
-        }
-        fieldset {
-            border: 3px solid white;
-            border-radius: 10px;
-            padding: 20px;
-        }
-        legend {
-            border: 2px solid white;
-            padding: 10px;
-            text-align: center;
-            border-radius: 8px;
-        }
-        .inputBox {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .inputUser {
-            background: none;
-            border: none;
-            border-bottom: 1px solid white;
-            outline: none;
-            color: white;
-            font-size: 15px;
-            width: 100%;
-            letter-spacing: 2px;
-        }
-        .labelInput {
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            pointer-events: none;
-            transition: .5s;
-        }
-        .inputUser:focus ~ .labelInput,
-        .inputUser:valid ~ .labelInput {
-            top: -20px;
-            font-size: 12px;
-            color: purple;
-        }
-        #data_nascimento {
-            border: none;
-            padding: 8px;
-            border-radius: 10px;
-            outline: none;
-            font-size: 15px;
-        }
-        #submit {
-            background-image: linear-gradient(to right, rgb(0, 92, 197), rgb(90, 20, 220));
-            width: 100%;
-            border: none;
-            padding: 15px;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-            border-radius: 10px;
-        }
-        #submit:hover {
-            background-image: linear-gradient(to right, rgb(0, 80, 172), rgb(80, 19, 195));
-        }
-        .styled-select {
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.4);
-            border: 1px solid white;
-            color: white;
-            width: 100%;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-size: 15px;
-        }
-        /* Estilos para mensagens */
-        .mensagem-sucesso, .mensagem-erro {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .mensagem-sucesso {
-            color: green;
-            border: 2px solid green;
-            background-color: rgba(0, 255, 0, 0.1);
-        }
-        .mensagem-erro {
-            color: red;
-            border: 2px solid red;
-            background-color: rgba(255, 0, 0, 0.1);
-        }
-        .home-icon {
-            width: 20px;
-            height: 20px;
-            vertical-align: middle;
-        }
-        .home-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            margin: 10px;
-        }
-    </style>
-    <script>
-        function goHome() {
-            window.location.href = 'Pagina_principal.php';
-        }
-    </script>
-</head>
-<body>
-<button class="home-button" onclick="goHome()">
-        <img src="home-icon.png" class="home-icon">
-    </button>
 
-    <div class="box">
-        <?php if (isset($mensagem)) echo $mensagem; ?>
-        <form method="post" action="">
-            <fieldset>
-                <legend><b>Cadastro de Ensalamento</b></legend>
-                <select name="curso" id="curso" class="styled-select">
-                    <option value="Téc. Desenvolvimento de Sistemas">Téc. Desenvolvimento de Sistemas</option>
-                    <option value="Téc. Alimentos">Téc. Alimentos</option>
-                    <option value="Téc. Administração">Téc. Administração</option>
-                    <option value="Téc. Automação Industrial">Téc. Automação Industrial</option>
-                    <option value="Téc. Eletroeletrônica">Téc. Eletroeletrônica</option>
-                </select>
-                <div class="inputBox">
-                    <input type="text" name="professor" id="professor" class="inputUser" required>
-                    <label for="professor" class="labelInput">Professor</label>
-                </div>
-                <div class="inputBox">
-                    <input type="text" name="data" id="data" class="inputUser" required>
-                    <label for="data" class="labelInput">Dia</label>
-                </div>
-                <div class="inputBox">
-                    <input type="text" name="hora" id="hora" class="inputUser" required>
-                    <label for="hora" class="labelInput">Horário</label>
-                </div>
-                <select name="sala" id="sala" class="styled-select">
-                    <option value="Lab de informática 1">Laboratório de informática 1</option>
-                    <option value="Lab de informática 2">Laboratório de informática 2</option>
-                    <option value="Simulador 1">Simulador 1</option>
-                    <option value="Simulador 2">Simulador 2</option>
-                    <option value="Oficina 1">Oficina 1</option>
-                    <option value="Oficina 2">Oficina 2</option>
-                </select>
-                <input type="submit" name="submit" id="submit" value="Cadastrar">
-            </fieldset>
-        </form>
-    </div>
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>Sistema de Ensalamento</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+
+font-family:'Segoe UI',sans-serif;
+
+height:100vh;
+
+overflow:hidden;
+
+background:#050816;
+
+position:relative;
+
+}
+
+/* Fundo tecnológico */
+
+body::before{
+
+content:"";
+
+position:absolute;
+
+width:100%;
+height:100%;
+
+background:
+radial-gradient(circle at 20% 30%, rgba(0,255,255,.12), transparent 30%),
+
+radial-gradient(circle at 80% 20%, rgba(138,43,226,.15), transparent 30%),
+
+radial-gradient(circle at 60% 80%, rgba(0,80,255,.12), transparent 30%);
+
+animation:pulse 7s infinite alternate;
+
+}
+
+body::after{
+
+content:"";
+
+position:absolute;
+
+width:100%;
+height:100%;
+
+background-image:
+linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+
+linear-gradient(90deg,
+rgba(255,255,255,.03) 1px,
+transparent 1px);
+
+background-size:40px 40px;
+
+}
+
+@keyframes pulse{
+
+from{
+transform:scale(1);
+opacity:.5;
+}
+
+to{
+transform:scale(1.1);
+opacity:1;
+}
+
+}
+
+/* partículas */
+
+.particle{
+
+position:absolute;
+
+bottom:-50px;
+
+background:cyan;
+
+border-radius:50%;
+
+opacity:.6;
+
+box-shadow:
+0 0 10px cyan,
+0 0 25px cyan;
+
+animation:subir linear infinite;
+
+z-index:0;
+
+}
+
+@keyframes subir{
+
+0%{
+transform:
+translateY(0)
+translateX(0);
+
+opacity:0;
+}
+
+20%{
+opacity:1;
+}
+
+100%{
+transform:
+translateY(-120vh)
+translateX(100px);
+
+opacity:0;
+}
+
+}
+
+/* card */
+
+.box{
+
+position:absolute;
+
+top:50%;
+left:50%;
+
+transform:
+translate(-50%,-50%);
+
+transform-style:
+preserve-3d;
+
+transition:
+transform .15s linear;
+
+z-index:5;
+
+width:90%;
+max-width:500px;
+
+padding:30px;
+
+border-radius:25px;
+
+background:
+rgba(255,255,255,.04);
+
+backdrop-filter:
+blur(25px);
+
+border:
+1px solid rgba(255,255,255,.08);
+
+box-shadow:
+0 0 30px rgba(0,255,255,.2),
+0 0 60px rgba(138,43,226,.2);
+
+color:white;
+
+}
+
+fieldset{
+
+border:
+1px solid rgba(0,255,255,.4);
+
+padding:20px;
+
+border-radius:20px;
+
+}
+
+legend{
+
+padding:10px 20px;
+
+border-radius:10px;
+
+font-weight:bold;
+
+background:
+linear-gradient(
+135deg,
+#00d4ff,
+#6a00ff);
+
+}
+
+/* inputs */
+
+.inputBox{
+
+position:relative;
+
+margin-bottom:25px;
+
+}
+
+.inputUser,
+.styled-select{
+
+width:100%;
+
+padding:15px;
+
+background:
+rgba(255,255,255,.04);
+
+border:
+1px solid rgba(255,255,255,.1);
+
+border-radius:12px;
+
+outline:none;
+
+color:white;
+
+transition:.4s;
+
+}
+
+.inputUser:focus,
+.styled-select:focus{
+
+border-color:#00d4ff;
+
+box-shadow:
+0 0 15px cyan;
+
+background:
+rgba(0,212,255,.06);
+
+}
+
+.labelInput{
+
+position:absolute;
+
+top:15px;
+left:15px;
+
+pointer-events:none;
+
+color:#aaa;
+
+transition:.4s;
+
+}
+
+.inputUser:focus~.labelInput,
+.inputUser:valid~.labelInput{
+
+top:-10px;
+
+font-size:12px;
+
+color:#00d4ff;
+
+}
+
+/* botão */
+
+#submit{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+cursor:pointer;
+
+font-size:16px;
+
+font-weight:bold;
+
+color:white;
+
+background:
+linear-gradient(
+135deg,
+#00d4ff,
+#6a00ff);
+
+transition:.4s;
+
+}
+
+#submit:hover{
+
+transform:
+translateY(-3px);
+
+box-shadow:
+0 0 20px cyan,
+0 0 50px #6a00ff;
+
+}
+
+.mensagem-sucesso{
+
+padding:10px;
+
+border-radius:10px;
+
+background:
+rgba(0,255,0,.1);
+
+border:1px solid #00ff88;
+
+margin-bottom:15px;
+
+text-align:center;
+
+}
+
+.mensagem-erro{
+
+padding:10px;
+
+border-radius:10px;
+
+background:
+rgba(255,0,0,.1);
+
+border:1px solid red;
+
+margin-bottom:15px;
+
+text-align:center;
+
+}
+
+.home-button{
+
+position:absolute;
+
+top:20px;
+left:20px;
+
+background:none;
+
+border:none;
+
+cursor:pointer;
+
+z-index:999;
+
+}
+
+.home-icon{
+
+width:40px;
+
+filter:
+drop-shadow(0 0 10px cyan);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<button class="home-button"
+onclick="window.location.href='Pagina_principal.php'">
+
+<img src="home-icon.png"
+class="home-icon">
+
+</button>
+
+<div class="box">
+
+<?php
+if(isset($mensagem)){
+echo $mensagem;
+}
+?>
+
+<form method="POST">
+
+<fieldset>
+
+<legend>
+Cadastro de Ensalamento
+</legend>
+
+<br>
+
+<select name="curso"
+class="styled-select">
+
+<option>Téc. Desenvolvimento de Sistemas</option>
+
+<option>Téc. Administração</option>
+
+<option>Téc. Alimentos</option>
+
+<option>Téc. Automação Industrial</option>
+
+<option>Téc. Eletroeletrônica</option>
+
+</select>
+
+<br>
+
+<div class="inputBox">
+
+<input
+type="text"
+name="professor"
+class="inputUser"
+required>
+
+<label class="labelInput">
+Professor
+</label>
+
+</div>
+
+
+<div class="inputBox">
+
+<input
+type="date"
+name="data"
+class="inputUser"
+required>
+
+<label class="labelInput">
+Data
+</label>
+
+</div>
+
+
+<div class="inputBox">
+
+<input
+type="time"
+name="hora"
+class="inputUser"
+required>
+
+<label class="labelInput">
+Horário
+</label>
+
+</div>
+
+
+<select
+name="sala"
+class="styled-select">
+
+<option>Laboratório informática 1</option>
+
+<option>Laboratório informática 2</option>
+
+<option>Simulador 1</option>
+
+<option>Simulador 2</option>
+
+<option>Oficina 1</option>
+
+<option>Oficina 2</option>
+
+</select>
+
+<br><br>
+
+<input
+type="submit"
+name="submit"
+id="submit"
+value="Cadastrar">
+
+</fieldset>
+
+</form>
+
+</div>
+
+<script>
+
+/* efeito 3D */
+
+const box=document.querySelector(".box");
+
+document.addEventListener("mousemove",(e)=>{
+
+let x=
+(window.innerWidth/2-e.clientX)/35;
+
+let y=
+(window.innerHeight/2-e.clientY)/35;
+
+box.style.transform=
+
+`translate(-50%,-50%)
+rotateY(${x}deg)
+rotateX(${-y}deg)`;
+
+});
+
+
+/* partículas */
+
+for(let i=0;i<35;i++){
+
+let p=
+document.createElement("div");
+
+p.classList.add("particle");
+
+p.style.left=
+Math.random()*100+"vw";
+
+p.style.width=
+(Math.random()*6+2)+"px";
+
+p.style.height=
+p.style.width;
+
+p.style.animationDuration=
+(Math.random()*8+4)+"s";
+
+p.style.animationDelay=
+Math.random()*5+"s";
+
+document.body.appendChild(p);
+
+}
+
+</script>
+
 </body>
 </html>

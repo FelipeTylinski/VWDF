@@ -15,7 +15,7 @@ $tipo_usuario = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : '
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-image: url('vwdf.jpg.png');
+            background-image: url('NOVA.png');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -199,4 +199,4 @@ $tipo_usuario = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : '
 </footer>
 
 </body>
-</html>
+</html> 
