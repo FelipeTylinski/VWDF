@@ -3,11 +3,14 @@ session_start();
 ob_start();
 include_once './Conexao.php';
 
+$erro = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $dados = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 
     if (!empty($dados["login"])) {
         if (filter_var($dados['email'], FILTER_VALIDATE_EMAIL)) {
+
             $query_verificar = "SELECT * FROM cadastrar WHERE email = :email AND senha = :senha";
             $verificar = $conn->prepare($query_verificar);
             $verificar->bindParam(':email', $dados['email'], PDO::PARAM_STR);
@@ -17,97 +20,286 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($verificar->rowCount() > 0) {
                 $user = $verificar->fetch(PDO::FETCH_ASSOC);
                 $_SESSION['user_email'] = $user['email'];
-                $_SESSION['tipo_usuario'] = $user['tipo_usuario']; // Assuming 'tipo_usuario' is the column name
-
-                if ($user['tipo_usuario'] == 'secretaria') {
-                    // Redirect to secretaria page
-                    header("Location: Pagina_principal.php");
-                } else {
-                    // Redirect to main page
-                    header("Location: Pagina_principal.php");
-                }
+                $_SESSION['tipo_usuario'] = $user['tipo_usuario'];
+                header("Location: Pagina_principal.php");
                 exit();
             } else {
-                echo "<p style='color: red;'>Erro: Email ou senha incorretos!</p>";
+                $erro = "⚠ Email ou senha incorretos!";
             }
         } else {
-            echo "<p style='color: red;'>Erro: Necessário preencher com um email válido!</p>";
+            $erro = "⚠ Preencha com um email válido!";
         }
     } else {
-        echo "<p style='color: red;'>Erro: Necessário preencher os campos!</p>";
+        $erro = "⚠ Preencha todos os campos!";
     }
 }
 ?>
-
 <!DOCTYPE HTML>
-<html>
+<html lang="pt-br">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
-        body {
-            background-image: url('vwdf.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background: #0a0a0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Fundo animado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(120, 40, 200, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 100, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, rgba(180, 0, 255, 0.1) 0%, transparent 50%);
+            z-index: 0;
+            animation: bgPulse 8s ease-in-out infinite alternate;
+            background-image: url('vwdf.jpg.png');
+        }
+
+        @keyframes bgPulse {
+            0%   { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Grid futurista */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(100, 50, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(100, 50, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+        }
+
+        /* Card */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            box-shadow:
+                0 0 0 1px rgba(130, 50, 255, 0.1),
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        /* Linha brilhante no topo */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(130, 50, 255, 0.8), transparent);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Título */
+        .card-title {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .card-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .card-title p {
+            color: rgba(255,255,255,0.35);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        /* Grupos de input */
+        .input-group {
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            gap: 6px;
+            margin-bottom: 18px;
         }
-        .container {
-            width: 300px;
-            border: 1px solid #ccc;
-            padding: 20px;
-            margin: 50px auto;
-            box-sizing: border-box;
-            border-radius: 15px;
-            background-color: rgba(0, 0, 0, 0.1);
+
+        .input-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        h1 {
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 35px;
-            color: white;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            color: white;
-            font-size: 22px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        input[type="email"], input[type="password"] {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
+
+        .input-group input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 10px;
-            outline: none;
-        }
-        input[type="submit"] {
-            background-color: purple;
+            padding: 13px 16px;
             color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
+            font-size: 14px;
             outline: none;
+            transition: all 0.3s ease;
+            width: 100%;
         }
+
+        .input-group input:focus {
+            border-color: rgba(130, 50, 255, 0.6);
+            background: rgba(130, 50, 255, 0.07);
+            box-shadow: 0 0 0 3px rgba(130, 50, 255, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255,255,255,0.2);
+        }
+
+        /* Mensagem de erro */
+        .msg-error {
+            background: rgba(255, 60, 60, 0.1);
+            border: 1px solid rgba(255, 60, 60, 0.2);
+            color: #ff8080;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Botões */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6d28d9, #4f46e5);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(109, 40, 217, 0.4);
+        }
+
+        /* Efeito brilho */
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before { left: 100%; }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(109, 40, 217, 0.6);
+        }
+
+        .btn-primary:active { transform: scale(0.98); }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 13px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.08), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-secondary:hover::before { left: 100%; }
+
+        .btn-secondary:hover {
+            border-color: rgba(255,255,255,0.2);
+            color: white;
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:active { transform: scale(0.98); }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <h1>Login</h1>
+    <div class="card">
+
+        <div class="card-title">
+            <h1>Bem-vindo</h1>
+            <p>Faça login para continuar</p>
+        </div>
+
+        <?php if ($erro): ?>
+            <div class="msg-error"><?= $erro ?></div>
+        <?php endif; ?>
+
         <form name="acessar" method="POST" action="">
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="email" placeholder="Email" required><br><br>
 
-            <label for="senha">Senha:</label>
-            <input type="password" name="senha" id="senha" placeholder="Password" required><br><br>
+            <div class="input-group">
+                <label for="email">E-mail</label>
+                <input type="email" name="email" id="email" placeholder="seu@email.com" required>
+            </div>
 
-            <input type="submit" value="Login" name="login">
+            <div class="input-group">
+                <label for="senha">Senha</label>
+                <input type="password" name="senha" id="senha" placeholder="••••••••" required>
+            </div>
+
+            <div class="btn-group">
+                <input type="submit" value="Entrar" name="login" class="btn-primary">
+                <button type="button" class="btn-secondary" onclick="window.location.href='Cadastro.php'">Cadastrar</button>
+            </div>
+
         </form>
     </div>
 </body>

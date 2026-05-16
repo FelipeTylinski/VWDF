@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$dbname = "CRUD";
+$dbname = "vwdf";
 $port = 3306;
 
 try {

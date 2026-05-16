@@ -1,146 +1,202 @@
 <?php
 session_start();  
-include_once './Conexao.php';  // Conexao com banco de dados 
+include_once './Conexao.php'; // Conexão com banco de dados
 
-// Verifica se o tipo de usuário está armazenado na sessão. Se estiver, atribui à variável $tipo_usuario.
-// Caso contrário, atribui uma string vazia.
+// Verifica o tipo de usuário na sessão
 $tipo_usuario = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Torna o site responsivo -->
-    <title>Página Principal</title>  <!-- Define o título da página -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
 
-    <!-- Estilos CSS internos para estilizar a página -->
     <style>
         body {
-            font-family: 'Roboto', sans-serif;  /* Define a fonte da página */
-            background-image: url('vwdf.jpg');  /* Adiciona uma imagem de fundo */
-            background-size: cover;  /* Ajusta a imagem para cobrir todo o fundo */
-            background-repeat: no-repeat;  /* Evita que a imagem de fundo se repita */
-            background-position: center;  /* Centraliza a imagem de fundo */
-            margin: 0;  /* Remove a margem padrão do body */
-            padding: 0;  /* Remove o padding padrão do body */
-            display: flex;  /* Define o display como flex */
-            flex-direction: column;  /* Coloca os elementos em uma coluna */
-            min-height: 100vh;  /* Define uma altura mínima de 100% da viewport */
-            color: #333;  /* Define a cor do texto como um cinza escuro */
+            font-family: 'Roboto', sans-serif;
+            background-image: url('vwdf.jpg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #333;
         }
 
         header {
-            background-color: rgba(0, 0, 0, 0.1);  /* Define uma cor de fundo semi-transparente */
-            color: #fff;  /* Define a cor do texto como branco */
-            padding: 20px;  /* Adiciona padding ao redor do conteúdo do header */
-            text-align: center;  /* Centraliza o texto no header */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Adiciona uma sombra ao header */
+            background-color: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
+        /* Barra lateral */
         nav {
-            background-color: rgba(0, 0, 0, 0.1);  /* Define uma cor de fundo semi-transparente para a barra de navegação */
-            width: 200px;  /* Define a largura fixa da barra lateral */
-            position: fixed;  /* Fixa a barra lateral na tela */
-            top: 0;  /* Alinha no topo */
-            left: 0;  /* Alinha à esquerda */
-            height: 100%;  /* Define a altura como 100% da tela */
-            overflow: auto;  /* Adiciona scroll se o conteúdo for maior que a tela */
-            padding-top: 20px;  /* Adiciona um espaçamento no topo da barra lateral */
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);  /* Adiciona sombra à lateral */
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow: auto;
+            padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 20px 10px;
+            box-sizing: border-box;
         }
 
+        /* Estilo base dos botões/links da nav */
         nav a, .logout-btn {
-            color: #fff;  /* Define a cor do texto como branco */
-            text-decoration: none;  /* Remove o sublinhado dos links */
-            padding: 15px 20px;  /* Adiciona padding aos links */
-            display: block;  /* Faz os links ocuparem toda a largura disponível */
-            font-weight: bold;  /* Deixa o texto em negrito */
-            transition: background 0.3s;  /* Adiciona uma transição suave ao background */
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
         }
 
-        nav a:hover, .logout-btn:hover {
-            background-color: #575757;  /* Altera a cor de fundo ao passar o mouse sobre o link */
+        /* Efeito de brilho ao passar o mouse */
+        nav a::before, .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.25),
+                transparent
+            );
+            transition: 0.5s;
         }
 
-        main {
-            margin-left: 220px;  /* Adiciona uma margem à esquerda para acomodar a barra lateral */
-            flex: 1;  /* Faz o conteúdo principal ocupar o espaço restante */
-            padding: 20px;  /* Adiciona padding ao conteúdo principal */
+        nav a:hover::before, .logout-btn:hover::before {
+            left: 100%; /* Brilho desliza da esquerda para direita */
         }
 
-        section {
-            color: #fff;  /* Define a cor do texto como branco */
-            text-align: center;  /* Centraliza o texto */
-            border-radius: 12px;  /* Adiciona bordas arredondadas */
+        /* Efeito hover nos links */
+        nav a:hover {
+            background: linear-gradient(135deg, #6a0dad, #9b30ff);
+            transform: translateX(5px); /* Desloca levemente para direita */
+            box-shadow: 0 6px 15px rgba(106, 13, 173, 0.5);
+            letter-spacing: 1px;
         }
 
-        footer {
-            background-color: rgba(0, 0, 0, 0.1);  /* Define uma cor de fundo semi-transparente para o rodapé */
-            color: #fff;  /* Define a cor do texto como branco */
-            text-align: center;  /* Centraliza o texto no rodapé */
-            padding: 10px 0;  /* Adiciona padding ao redor do texto no rodapé */
-            width: 100%;  /* Faz o rodapé ocupar toda a largura */
-            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);  /* Adiciona uma sombra ao rodapé */
-            position: fixed;  /* Fixa o rodapé no fundo da página */
-            bottom: 0;  /* Alinha o rodapé ao fundo */
-            left: 0;  /* Alinha o rodapé à esquerda */
-        }
-
+        /* Botão de logout com cor diferente */
         .logout-btn {
-            background-color: #ff4b5c;  /* Define a cor de fundo para o botão de logout */
-            border: none;  /* Remove a borda padrão do botão */
-            cursor: pointer;  /* Muda o cursor para pointer ao passar o mouse */
-            text-align: left;  /* Alinha o texto à esquerda dentro do botão */
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            margin-top: auto; /* Empurra o logout para o fundo */
+            width: 100%;
+            font-family: 'Roboto', sans-serif;
         }
 
         .logout-btn:hover {
-            background-color: #e43f52;  /* Altera a cor de fundo ao passar o mouse sobre o botão de logout */
+            background: linear-gradient(135deg, #e74c3c, #ff6b6b);
+            transform: translateX(5px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.5);
+        }
+
+        /* Efeito de clique */
+        nav a:active, .logout-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        main {
+            margin-left: 220px;
+            flex: 1;
+            padding: 20px;
+        }
+
+        section {
+            color: #fff;
+            text-align: center;
+            border-radius: 12px;
+        }
+
+        footer {
+            background-color: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);
+            position: fixed;
+            bottom: 0;
+            left: 0;
         }
 
         @media (max-width: 600px) {
             nav {
-                width: 100%;  /* Faz a barra lateral ocupar toda a largura da tela em telas menores */
-                height: auto;  /* Define a altura como automática */
-                position: relative;  /* Remove a posição fixa da barra lateral */
+                width: 100%;
+                height: auto;
+                position: relative;
+                flex-direction: row;
+                flex-wrap: wrap;
             }
             nav a {
-                float: left;  /* Faz os links flutuarem à esquerda */
-                padding: 10px;  /* Reduz o padding para telas menores */
+                float: left;
+                padding: 10px;
             }
             main {
-                margin-left: 0;  /* Remove a margem da esquerda para telas menores */
+                margin-left: 0;
             }
         }
     </style>
 </head>
 <body>
+
 <header>
-    <h1> Bem-Vindo à Página Principal</h1>  <!-- Cabeçalho da página -->
+    <h1>Bem-Vindo à Página Principal</h1>
 </header>
+
 <nav>
-    <!-- Formulário para logout -->
-    <form method="POST" action="logout.php">
-        <button type="submit" class="logout-btn">Sair</button>  <!-- Botão de logout -->
-    </form>
-    
-    <!-- Links de navegação -->
-    <a href="Consultar.php">Consultar</a>  <!-- Link para consultar -->
-    
-    <!-- Verifica se o usuário não é um aluno e exibe opções adicionais -->
-    <?php if ($tipo_usuario = 'aluno'): ?>
-        <a href="Cad_ensalamento.php">Novo Ensalamento</a>  <!-- Link para cadastro de ensalamento -->
-        <a href="Cadastro.php">Cadastrar Usuário</a>  <!-- Link para cadastro de usuário -->
+    <!-- Link para consultar -->
+    <a href="Consultar.php">🔍 Consultar</a>
+
+    <!-- Exibe opções extras dependendo do tipo de usuário -->
+    <?php if ($tipo_usuario == 'secretaria'): ?>
+        <a href="Cad_ensalamento.php">📋 Novo Ensalamento</a>
+        <a href="Cadastro.php">👤 Cadastrar Usuário</a>
     <?php endif; ?>
+
+    <!-- Botão de logout -->
+    <form method="POST" action="logout.php">
+        <button type="submit" class="logout-btn">🚪 Sair</button>
+    </form>
 </nav>
+
 <main>
     <section>
-        <h2>O que você procura?</h2>  <!-- Título do conteúdo principal -->
-        <p>Explore nossos serviços e descubra mais sobre nós.</p>  <!-- Texto descritivo -->
+        <h2>O que você procura?</h2>
+        <p>Explore nossos serviços e descubra mais sobre nós.</p>
     </section>
 </main>
+
 <footer>
-    <p>&copy; 2024 Página Inicial. Todos os direitos reservados.</p>  <!-- Rodapé com direitos reservados -->
+    <p>&copy; 2024 Página Inicial. Todos os direitos reservados.</p>
 </footer>
+
 </body>
 </html>
-        
